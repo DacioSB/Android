@@ -25,8 +25,6 @@ class _HomeState extends State<Home> {
   final _toDoController = TextEditingController();
 
   List _toDoList = [];
-  Map<String, dynamic> _lastRemoved;
-  int _lastRemovedPos;
 
   @override
   void initState() {
@@ -70,79 +68,6 @@ class _HomeState extends State<Home> {
     }
   }
 
-  Widget buildItem(context, index) {
-    return Dismissible(
-      background: Container(
-        color: this._lightBlue,
-        child: Align(
-          alignment: Alignment(-0.9, 0.0),
-          child: Icon(
-            Icons.delete,
-            color: this._lightPink,
-          ),
-        ),
-      ),
-      direction: DismissDirection.startToEnd,
-      key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
-      child: CheckboxListTile(
-        onChanged: (check) {
-          setState(() {
-            this._toDoList[index]["ok"] = check;
-            _saveData();
-          });
-        },
-        activeColor: this._darkBlue,
-        title: Text(this._toDoList[index]["title"]),
-        value: this._toDoList[index]["ok"],
-        secondary: CircleAvatar(
-          backgroundColor: _toDoList[index]["ok"] ? this._darkBlue : this._pink,
-          child: Icon(
-            _toDoList[index]["ok"] ? Icons.check : Icons.error,
-            color: this._lightPink,
-          ),
-        ),
-      ),
-      onDismissed: (direction) {
-        setState(() {
-          this._lastRemoved = Map.from(this._toDoList[index]);
-          _lastRemovedPos = index;
-          this._toDoList.removeAt(index);
-          _saveData();
-          final snack = SnackBar(
-            content: Text("Tarefa \"${this._lastRemoved["title"]}\" removida"),
-            action: SnackBarAction(
-                label: "Desfazer",
-                onPressed: () {
-                  setState(() {
-                    this._toDoList.insert(_lastRemovedPos, _lastRemoved);
-                    this._saveData();
-                  });
-                }),
-            duration: Duration(seconds: 2),
-          );
-          Scaffold.of(context).removeCurrentSnackBar();
-          Scaffold.of(context).showSnackBar(snack);
-        });
-      },
-    );
-  }
-
-  Future<void> _refresh() async {
-    await new Future.delayed(new Duration(seconds: 1));
-    setState(() {
-      this._toDoList.sort((a, b) {
-        if (a["ok"] && !b["ok"]) {
-          return 1;
-        } else if (!a["ok"] && b["ok"]) {
-          return -1;
-        } else {
-          return 0;
-        }
-      });
-      _saveData();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -177,13 +102,31 @@ class _HomeState extends State<Home> {
             ),
           ),
           Expanded(
-              child: RefreshIndicator(
-                  child: ListView.builder(
-                    padding: EdgeInsets.only(top: 10.0),
-                    itemCount: this._toDoList.length,
-                    itemBuilder: buildItem,
+              child: ListView.builder(
+            padding: EdgeInsets.only(top: 10.0),
+            itemCount: this._toDoList.length,
+            itemBuilder: (context, index) {
+              return CheckboxListTile(
+                onChanged: (check) {
+                  setState(() {
+                    this._toDoList[index]["ok"] = check;
+                    _saveData();
+                  });
+                },
+                activeColor: this._darkBlue,
+                title: Text(this._toDoList[index]["title"]),
+                value: this._toDoList[index]["ok"],
+                secondary: CircleAvatar(
+                  backgroundColor:
+                      _toDoList[index]["ok"] ? this._darkBlue : this._pink,
+                  child: Icon(
+                    _toDoList[index]["ok"] ? Icons.check : Icons.error,
+                    color: this._lightPink,
                   ),
-                  onRefresh: _refresh))
+                ),
+              );
+            },
+          ))
         ],
       ),
     );
