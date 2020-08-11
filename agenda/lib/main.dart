@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:agenda/ui/home_page.dart';
 
 main() {
-  runApp(MaterialApp());
+  runApp(MaterialApp(
+    home: HomePage(),
+  ));
 }
