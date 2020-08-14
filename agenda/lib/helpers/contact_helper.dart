@@ -99,6 +99,7 @@ class Contact {
   String img;
   int id;
 
+  Contact();
   //A gente armazena contatos no banco de dados em forma de mapa
   //Entao tem que transformar de mapa para objeto novamente
   Contact.fromMap(Map map) {
